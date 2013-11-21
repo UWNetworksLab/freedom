@@ -1,17 +1,26 @@
 /**
- * A FreeDOM storage provider offers a key value store interface
- * with some level of persistance, and some size limitation.
- * @constructor
- * @private
+ * A FreeDOM core.storage provider that depends on localStorage
+ * Thus, this only works in the context of a webpage and has
+ * some size limitations.
+ * Note that this can conflict with other scripts using localStorage
+ * as keys are raw
  */
 var Storage_unprivileged = function(app) {
   this.app = app;
   handleEvents(this);
 };
 
+Storage_unprivileged.prototype.keys = function(continuation) {
+  var result = [];
+  for (var i = 0; i < localStorage.length; i++) {
+    result.push(localStorage.key(i));
+  }
+  continuation(result);
+};
+
 Storage_unprivileged.prototype.get = function(key, continuation) {
   try {
-    var val = localStorage[this.app.manifestId + key];
+    var val = localStorage.getItem(key);
     continuation(val);
   } catch(e) {
     continuation(null);
@@ -19,12 +28,12 @@ Storage_unprivileged.prototype.get = function(key, continuation) {
 };
 
 Storage_unprivileged.prototype.set = function(key, value, continuation) {
-  localStorage[this.app.manifestId + key] = value;
+  localStorage.setItem(key, value);
   continuation();
 };
 
 Storage_unprivileged.prototype.remove = function(key, continuation) {
-  localStorage.removeItem(this.app.manifestId + key);
+  localStorage.removeItem(key);
   continuation();
 };
 
@@ -33,4 +42,5 @@ Storage_unprivileged.prototype.clear = function(continuation) {
   continuation();
 };
 
+/** REGISTER PROVIDER **/
 fdom.apis.register("core.storage", Storage_unprivileged);

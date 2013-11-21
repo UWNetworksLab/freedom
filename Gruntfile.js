@@ -12,19 +12,19 @@ module.exports = function(grunt) {
     },
     jshint: {
       beforeconcat: [
-          'src/libs/*.js',
-          'src/*.js',
-          'src/proxy/*.js',
-          'providers/*.js',
-          'interface/*.js',
+        'src/libs/*.js',
+        'src/*.js',
+        'src/proxy/*.js',
+        'providers/*.js',
+        'interface/*.js',
       ],
       afterconcat: ['freedom.js'],
-      files: [
-          'src/libs/*.js',
-          'src/*.js',
-          'src/proxy/*.js',
-          'providers/*.js',
-          'interface/*.js',
+      providers: [
+        'providers/storage/*.js',
+        'providers/social/websocket-server/*.js',
+      ],
+      demo: [
+        'demo/**/*.js'
       ],
       options: {
         '-W069': true
@@ -81,12 +81,27 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-yuidoc');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
+  // Custom Task for Chrome Test Runner
+  grunt.registerTask('chromeTestRunner', "Runs tests in a Chrome App", function(){
+    grunt.util.spawn({
+      cmd: 'bash',
+      args: ['tools/chromeTestRunner.sh'],
+    }, function done(error, result, code) {
+      grunt.log.ok('Failed to execute shell script:'+
+        "\n\t"+error+
+        "\n\tResult: "+result+
+        "\n\tCode: "+code);
+    });
+  });
+
   // Default tasks.
   grunt.registerTask('freedom', [
     'jshint:beforeconcat',
     'concat',
     'jasmine',
     'jshint:afterconcat',
+    'jshint:providers',
+    'jshint:demo',
     'uglify'
   ]);
   grunt.registerTask('default', ['freedom']);
