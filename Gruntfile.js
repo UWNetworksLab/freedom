@@ -3,7 +3,8 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     jasmine: {
       freedom: {
-        src: ['src/libs/*.js', 'src/*.js', 'src/proxy/*.js', 'interface/*.js'],
+        src: ['src/libs/*.js', 'src/*.js', 'src/proxy/*.js', 'interface/*.js',
+              'providers/core.unprivileged.js', 'providers/echo.unprivileged.js'],
         options: {
           specs: ['spec/*Spec.js', 'spec/providers/*Spec.js']
         }
@@ -94,6 +95,19 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-yuidoc');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-typescript');
+
+  // Custom Task for Chrome Test Runner
+  grunt.registerTask('chromeTestRunner', "Runs tests in a Chrome App", function(){
+    grunt.util.spawn({
+      cmd: 'bash',
+      args: ['tools/chromeTestRunner.sh'],
+    }, function done(error, result, code) {
+      grunt.log.ok('Failed to execute shell script:'+
+        "\n\t"+error+
+        "\n\tResult: "+result+
+        "\n\tCode: "+code);
+    });
+  });
 
   // Default tasks.
   grunt.registerTask('freedom', [

@@ -1,4 +1,4 @@
-describe("freedom", function() {
+describe("channels", function() {
   var xhr = new XMLHttpRequest();
   xhr.open("get", "freedom.js", false);
   xhr.overrideMimeType("text/javascript; charset=utf-8");
@@ -40,7 +40,7 @@ describe("freedom", function() {
         dir_idx = path.lastIndexOf('/'),
         dir = path.substr(0, dir_idx) + '/';
     freedom = setup(global, undefined, {
-      manifest: "relative://spec/helper/manifest.json",
+      manifest: "relative://spec/helper/channel.json",
       portType: 'Frame',
       inject: dir + "node_modules/es5-shim/es5-shim.js",
       src: freedom_src
@@ -54,23 +54,52 @@ describe("freedom", function() {
     }
   });
 
-  it("creates modules", function() {
+  it("Manages Channels Between Modules", function() {
     var cb = jasmine.createSpy('cb');
     var called = false;
     runs(function() {
-      freedom.on('output', cb);
-      freedom.on('output', function() {
-        called = true;
+      freedom.once('message', function(msg) {
+        // created.
+        expect(msg).toEqual('creating custom channel 0');
+        freedom.on('message', cb);
+        freedom.on('message', function() {
+          called = true;
+        });
+        freedom.emit('message', 0);
       });
-      freedom.emit('input', 'roundtrip');
+      freedom.emit('create');
     });
 
     waitsFor(function() {
       return called;
-    }, "Freedom should return input", 4000);
+    }, "Freedom should return success", 4000);
 
     runs(function() {
-      expect(cb).toHaveBeenCalledWith('roundtrip');
+      expect(cb).toHaveBeenCalledWith('sending message to 0');
+    });
+  });
+
+  it("Manages Channels With providers", function() {
+    var cb = jasmine.createSpy('cb');
+    var called = false;
+    runs(function() {
+      freedom.once('message', function(msg) {
+        // created.
+        freedom.on('message', cb);
+        freedom.on('message', function() {
+          called = true;
+        });
+        freedom.emit('message', 0);
+      });
+      freedom.emit('peer');
+    });
+
+    waitsFor(function() {
+      return called;
+    }, "Freedom should return success", 4000);
+
+    runs(function() {
+      expect(cb).toHaveBeenCalledWith('sending message to 0');
     });
   });
 });
