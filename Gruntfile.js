@@ -69,6 +69,20 @@ module.exports = function(grunt) {
           outdir: 'tools/doc/'
         }
       }
+    },
+    typescript: {
+      base: {
+        src: ['src/libs/typescript-defs/*.d.ts', 'src/libs/*.ts'],
+        dest: 'src/libs',
+        options: {
+          module: 'amd', //or commonjs
+          target: 'es5', //or es3
+          // base_path: 'src/libs',
+          sourcemap: true,
+          fullSourceMapPath: true,
+          declaration: true,
+        }
+      }
     }
   });
 
@@ -79,9 +93,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-yuidoc');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-typescript');
 
   // Default tasks.
   grunt.registerTask('freedom', [
+    'typescript:base',
     'jshint:beforeconcat',
     'concat',
     'jasmine',
