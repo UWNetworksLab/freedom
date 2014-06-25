@@ -261,6 +261,27 @@ fdom.apis.set('core.peerconnection', {
   // Returns local SDP headers from createOffer.
   'getInfo': {type: 'method', value: [], ret: 'string'},
 
+  // Returns interesting facts and figures about the current connection.
+  // Exposes a subset of data obtained from getStats:
+  //   http://www.w3.org/TR/webrtc/#dom-peerconnection-getstats
+  // Fulfills once a connection has been established and stats are available.
+  // Note: This is experimental because getStats() behaviour currently
+  //       differs greatly between between browsers.
+  'getStats': {
+    type: 'method',
+    value: [], 
+    ret: {
+      // Address on which local WebRTC is listening.
+      'localAddress': 'string',
+      // Port on which local WebRTC is listening.
+      'localPort': 'number',
+      // Address on which remote peer is listening.
+      'remoteAddress': 'string',
+      // Port on which remote peer is listening.
+      'remotePort': 'number'
+    }
+  },
+
   // Close the peer connection.
   'close': {type: 'method', value: []},
   // The peer connection has been closed.
