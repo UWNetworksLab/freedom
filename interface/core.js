@@ -70,7 +70,7 @@ fdom.apis.set('core.tcpsocket', {
     'errcode': 'string',
     'message': 'string'
   }},
-  
+
   // Connect to a host and port.
   // Fails with an error if connection fails.
   'connect': {
@@ -81,7 +81,7 @@ fdom.apis.set('core.tcpsocket', {
       'message': 'string'
     }
   },
-  
+
   // Write buffer data to a socket.
   // Fails with an error if write fails.
   'write': {
@@ -342,4 +342,14 @@ fdom.apis.set('core.websocket', {
       'wasClean': 'boolean'
     }
   }
+});
+
+fdom.apis.set('core.keystore', {
+
+  'getPublicKeyFingerprint': {
+    type: 'method',
+    value: [],
+    ret: 'string'
+  }
+
 });
