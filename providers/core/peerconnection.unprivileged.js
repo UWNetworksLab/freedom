@@ -325,6 +325,14 @@ SimpleDataPeer.prototype.onDataChannel = function (event) {
   }
 };
 
+SimpleDataPeer.prototype.getStats = function (callback) {
+  if (this.pcState === SimpleDataPeerState.CONNECTED) {
+    this.pc.getStats(callback);
+  } else {
+    console.error(this.peerName + ": cannot call getStats until connected");
+  }
+};
+
 // _signallingChannel is a channel for emitting events back to the freedom Hub.
 function PeerConnection(portModule, dispatchEvent,
                         RTCPeerConnection, RTCSessionDescription,
@@ -473,6 +481,40 @@ PeerConnection.prototype.send = function (sendInfo, continuation) {
 
 PeerConnection.prototype.getBufferedAmount = function (channelId, continuation) {
   continuation(this.peer.getBufferedAmount(channelId));
+};
+
+// TODO: handle Firefox stats
+PeerConnection.prototype.getStats = function (continuation) {
+  var callback = function(stats) { // RTCStatsResponse
+    var reports = stats.result(); // RTCStatsReport
+    // We need to find the report having a stat named 'googActiveConnection'.
+    // This report will also contain the local and remote endpoints.
+    //
+    // Note:
+    //  - the info is in a report named 'Channel-audio-1' (or similar)
+    //  - the info isn't always present the first time getStats() is called
+    //
+    // Neither of these issues seem fatal and hopefully Chrome will implement
+    // the proposed standard soon and fix these issues.
+    for (var i = 0; i < reports.length; i++) {
+      var report = reports[i];
+      // RTCStatsReport does *not* return an array and googActiveConnection
+      // is a string, hence the weirdness.
+      if (report.stat('googActiveConnection') === 'true') {
+        var localFields = report.stat('googLocalAddress').split(':');
+        var remoteFields = report.stat('googRemoteAddress').split(':');
+        continuation({
+          localAddress: localFields[0],
+          localPort: localFields[1],
+          remoteAddress: remoteFields[0],
+          remotePort: remoteFields[1]
+        });
+        return;
+      }
+    }
+    window.setTimeout(function() { this.peer.getStats(callback); }.bind(this), 1000);
+  };
+  this.peer.getStats(callback);
 };
 
 PeerConnection.prototype.close = function (continuation) {
